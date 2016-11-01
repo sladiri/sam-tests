@@ -1,4 +1,6 @@
+@value primary: hwb(90, 0%, 30%, 0.5);
+
 .world {
-  color: hwb(90, 0%, 30%, 0.5);
+  color: primary;
   font-size: 2em;
 }
