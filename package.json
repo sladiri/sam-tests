@@ -9,7 +9,7 @@
     "build:watch": "watch \"npm run build\" src",
     "live": "live-reload index.html dist/  --port 9091",
     "start": "parallelshell \"npm run live\" \"npm run build:watch\"",
-    "test": "browserify -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ] src/counter.spec.js | browser-run -p 2222 | faucet"
+    "test": "npm run clean && npm run build && browserify -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ] src/counter.spec.js | browser-run -p 2222 | faucet"
   },
   "author": "Slađan Ristić",
   "license": "ISC",
