@@ -5,11 +5,11 @@
     "env": "env",
     "clean": "rimraf dist",
     "prebuild": "mkdirp dist",
-    "build": "browserify src/main.js -o dist/main.js -t [ babelify --presets [ latest ] --plugins [ transform-do-expressions transform-async-generator-functions transform-function-bind transform-object-rest-spread ] ] -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ]",
+    "build": "browserify src/main.js -o dist/main.js -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ]",
     "build:watch": "watch \"npm run build\" src",
     "live": "live-reload index.html dist/  --port 9091",
     "start": "parallelshell \"npm run live\" \"npm run build:watch\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "browserify -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ] src/counter.spec.js | browser-run -p 2222 | faucet"
   },
   "author": "Slađan Ristić",
   "license": "ISC",
@@ -27,9 +27,11 @@
     "babel-plugin-transform-object-rest-spread": "latest",
     "babel-preset-latest": "latest",
     "babelify": "latest",
+    "browser-run": "latest",
     "browserify": "latest",
     "colorguard": "latest",
     "css-modulesify": "latest",
+    "faucet": "latest",
     "garnish": "latest",
     "live-reload": "latest",
     "mkdirp": "latest",
@@ -37,6 +39,7 @@
     "postcss-cssnext": "latest",
     "rimraf": "latest",
     "stylelint-config-standard": "latest",
+    "tape": "latest",
     "watch": "latest"
   }
 }

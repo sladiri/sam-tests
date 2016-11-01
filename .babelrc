@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    "transform-do-expressions",
+    "transform-async-generator-functions",
+    "transform-function-bind",
+    "transform-object-rest-spread"
+  ],
+  "presets": ["latest"],
+  "ignore": []
+}
