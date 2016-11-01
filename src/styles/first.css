@@ -1,6 +1,0 @@
-@value primary: hwb(90, 0%, 30%, 0.5);
-
-.first {
-  color: primary;
-  font-size: 3em;
-}
