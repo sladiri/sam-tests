@@ -4,28 +4,37 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "budo src/main.js:dist/main.js --css dist/main.css --live -- -t [ babelify --presets [ latest ] --plugins [ transform-do-expressions transform-async-generator-functions transform-function-bind transform-object-rest-spread ] ] -p [ css-modulesify --after autoprefixer -o dist/main.css ]",
-    "inject": "budo-chrome main.js --open | garnish",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "env": "env",
+    "clean": "rimraf dist/*",
+    "build": "browserify src/main.js > dist/main.js -t [ babelify --presets [ latest ] --plugins [ transform-do-expressions transform-async-generator-functions transform-function-bind transform-object-rest-spread ] ] -p [ css-modulesify -o dist/main.css --after postcss-cssnext --after colorguard ]",
+    "build:watch": "watch \"npm run build\" src",
+    "live": "live-reload index.html dist/  --port 9091",
+    "start": "parallelshell \"npm run live\" \"npm run build:watch\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "fu": "colorguard --file src/styles/main.css"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "tartjs": "0.0.0",
     "yo-yo": "^1.3.1"
   },
   "devDependencies": {
-    "autoprefixer": "^6.5.1",
-    "babel-plugin-transform-async-generator-functions": "^6.17.0",
-    "babel-plugin-transform-do-expressions": "^6.8.0",
-    "babel-plugin-transform-function-bind": "^6.8.0",
-    "babel-plugin-transform-object-rest-spread": "^6.16.0",
-    "babel-preset-latest": "^6.16.0",
-    "babelify": "^7.3.0",
-    "browserify": "^13.1.1",
-    "budo": "^9.2.1",
-    "budo-chrome": "^3.0.0",
-    "css-modulesify": "^0.25.1",
-    "garnish": "^5.2.0"
+    "babel-plugin-transform-async-generator-functions": "latest",
+    "babel-plugin-transform-do-expressions": "latest",
+    "babel-plugin-transform-function-bind": "latest",
+    "babel-plugin-transform-object-rest-spread": "latest",
+    "babel-preset-latest": "latest",
+    "babelify": "latest",
+    "browserify": "latest",
+    "colorguard": "latest",
+    "css-modulesify": "latest",
+    "garnish": "latest",
+    "live-reload": "latest",
+    "parallelshell": "latest",
+    "postcss-cssnext": "latest",
+    "rimraf": "latest",
+    "watch": "latest"
   }
 }

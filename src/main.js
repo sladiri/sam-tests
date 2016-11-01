@@ -1,5 +1,7 @@
 import yo from 'yo-yo'
-import styles from './main.css'
+import styles from './styles/main.css'
+
+console.log('hooha', styles)
 
 document.body.appendChild(yo`<div class="${styles.world}">Hello</div>`)
 
