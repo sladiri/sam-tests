@@ -4,7 +4,7 @@
   "scripts": {
     "env": "env",
     "clean": "rimraf dist/*",
-    "build": "browserify src/main.js > dist/main.js -t [ babelify --presets [ latest ] --plugins [ transform-do-expressions transform-async-generator-functions transform-function-bind transform-object-rest-spread ] ] -p [ css-modulesify -o dist/main.css --after postcss-cssnext --after colorguard ]",
+    "build": "browserify src/main.js > dist/main.js -t [ babelify --presets [ latest ] --plugins [ transform-do-expressions transform-async-generator-functions transform-function-bind transform-object-rest-spread ] ] -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ]",
     "build:watch": "watch \"npm run build\" src",
     "live": "live-reload index.html dist/  --port 9091",
     "start": "parallelshell \"npm run live\" \"npm run build:watch\"",
