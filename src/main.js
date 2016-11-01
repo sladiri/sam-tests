@@ -2,7 +2,7 @@ import yo from 'yo-yo'
 import mainStyles from './styles/main.css'
 import secondStyles from './styles/second.css'
 
-console.log('hooha', mainStyles, secondStyles)
+console.log('foo', mainStyles, secondStyles)
 
 document.body.appendChild(yo`<div class="${mainStyles.world}">Hello</div>`)
 
