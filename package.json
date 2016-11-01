@@ -10,8 +10,7 @@
     "build:watch": "watch \"npm run build\" src",
     "live": "live-reload index.html dist/  --port 9091",
     "start": "parallelshell \"npm run live\" \"npm run build:watch\"",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "fu": "colorguard --file src/styles/main.css"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
