@@ -36,6 +36,7 @@
     "parallelshell": "latest",
     "postcss-cssnext": "latest",
     "rimraf": "latest",
+    "stylelint-config-standard": "latest",
     "watch": "latest"
   }
 }
