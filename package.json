@@ -1,8 +1,6 @@
 {
   "name": "sam-tests",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "env": "env",
     "clean": "rimraf dist/*",
@@ -12,8 +10,7 @@
     "start": "parallelshell \"npm run live\" \"npm run build:watch\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Slađan Ristić",
   "license": "ISC",
   "dependencies": {
     "tartjs": "0.0.0",
