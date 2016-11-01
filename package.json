@@ -13,7 +13,10 @@
   "author": "Slađan Ristić",
   "license": "ISC",
   "dependencies": {
+    "domvm": "latest",
+    "flyd": "latest",
     "tartjs": "latest",
+    "trine": "latest",
     "yo-yo": "latest"
   },
   "devDependencies": {
