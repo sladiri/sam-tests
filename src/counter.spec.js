@@ -1,6 +1,7 @@
 import test from 'tape'
-import EventEmitter2 from 'eventemitter2'
+import EventEmitter3 from 'eventemitter3'
 import { state, action, model } from './counter'
+
 
 function setup () {
   const bus = {
@@ -16,7 +17,7 @@ function setup () {
 }
 
 function setupAsync () {
-  const bus = new EventEmitter2()
+  const bus = new EventEmitter3()
   return {
     bus,
     stateDispose: state({ bus }),
@@ -42,10 +43,10 @@ test('model count increments with value async', t => {
   t.plan(1)
 
   const dispose = setupAsync()
-  dispose.bus.on('state', ({ state: { count } }) => {
+  dispose.bus.on('accepted', ({ state: { count } }) => {
     t.equal(count, 42, 'async')
   })
-  dispose.bus.emit('action', { action: 'increment', value: 42 })
+  dispose.bus.emit('accept', { proposal: { count: 42 } })
 
   cleanupAsync(dispose)
   t.end()

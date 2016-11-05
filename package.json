@@ -5,24 +5,28 @@
     "env": "env",
     "clean": "rimraf dist",
     "prebuild": "mkdirp dist",
-    "build": "browserify src/main.js --debug -o dist/main.js -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ] | garnish",
-    "build:watch": "watch \"npm run build\" src",
+    "build": "browserify src/main.js --debug -o dist/main.js -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ]",
+    "build:watch": "watch \"npm run build\" src | garnish",
     "live": "live-reload index.html dist/ --port 9091",
-    "start": "parallelshell \"npm run live\" \"npm run test:watch\" \"npm run build:watch\"",
-    "test": "babel-tape-runner src/**/*.spec.js | faucet",
-    "test:watch": "watch \"npm run test\" src"
+    "start": "npm run clean && parallelshell \"npm run live\" \"npm run test:watch\" \"npm run build:watch\"",
+    "test:node": "babel-tape-runner src/**/*.spec.js | faucet",
+    "test:browser": "browserify src/**/*.spec.js -t babelify | tape-run | faucet",
+    "test": "npm run test:node && npm run test:browser",
+    "test:watch": "watch \"npm run test\" src",
+    "test:watch:browser": "watch \"npm run test:browser\" src"
   },
   "author": "Slađan Ristić",
   "license": "ISC",
   "dependencies": {
     "domvm": "latest",
-    "eventemitter2": "latest",
+    "eventemitter3": "latest",
     "flyd": "latest",
     "tartjs": "latest",
     "trine": "latest",
     "yo-yo": "latest"
   },
   "devDependencies": {
+    "babel-cli": "latest",
     "babel-plugin-transform-async-generator-functions": "latest",
     "babel-plugin-transform-do-expressions": "latest",
     "babel-plugin-transform-function-bind": "latest",
@@ -42,6 +46,7 @@
     "rimraf": "latest",
     "stylelint-config-standard": "latest",
     "tape": "latest",
+    "tape-run": "latest",
     "watch": "latest"
   }
 }

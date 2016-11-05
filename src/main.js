@@ -1,23 +1,28 @@
 import yo from 'yo-yo'
 import { state, action, model } from './counter'
-import EventEmitter2 from 'eventemitter2'
+import EventEmitter3 from 'eventemitter3'
 
 
-const bus = new EventEmitter2()
-bus.on('newListener', (value) => {
-  console.log('bus got new listener:', value)
-})
+const bus = new EventEmitter3()
 
-function stateRep ({ state }) {
-  console.log('stateRep:', state)
-  const view = yo`<div>Model count: ${state.count}</div>`
-  yo.update(document.body, view)
-}
-bus.on('stateRep', stateRep)
-
-document.body.appendChild(yo`<div></div>`)
 state({ bus })
+const { actions } = action({ bus })
 model({ bus })
-const { methods } = action({ bus })
 
-bus.emit('action', { action: methods.increment, value: 0 })
+function view ({ actions }) {
+  const increment = event => {
+    bus.emit('action', { action: actions.increment })
+  }
+  return function stateRep ({ state }) {
+    console.log('view:', state)
+    const nextView = yo`
+      <div>
+        <div>Model count: ${state.count}</div>
+        <button onclick=${increment}>Increment</button>
+      </div>`
+    yo.update(document.body.firstChild, nextView)
+  }
+}
+document.body.appendChild(yo`<div></div>`)
+bus.on('stateRep', view({ actions }))
+bus.emit('action', { action: actions.increment, value: 0 })

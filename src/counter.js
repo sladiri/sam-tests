@@ -1,21 +1,21 @@
 export function state ({ bus }) {
   function listen ({ state }) {
-    console.log('state:', state)
+    console.log('accepted:', state)
     bus.emit('stateRep', { state })
   }
 
-  bus.on('state', listen)
+  bus.on('accepted', listen)
 
   return {
     listen,
     dispose () {
-      bus.removeListener('state', listen)
+      bus.removeListener('accepted', listen)
     },
   }
 }
 
 export function action ({ bus }) {
-  const methods = {
+  const actions = {
     increment ({ value }) {
       return { count: value !== undefined ? value : 1 }
     },
@@ -29,14 +29,14 @@ export function action ({ bus }) {
         ? action.name
         : undefined
     console.log('action:', actionName, value)
-    const proposal = methods[actionName]({ value })
+    const proposal = actions[actionName]({ value })
     bus.emit('accept', { proposal })
   }
 
   bus.on('action', propose)
 
   return {
-    methods,
+    actions,
     dispose () {
       bus.removeListener('action', propose)
     },
@@ -51,7 +51,7 @@ export function model ({ bus }) {
   function accept ({ proposal }) {
     console.log('proposal:', proposal)
     state.count += proposal.count
-    bus.emit('state', { state })
+    bus.emit('accepted', { state })
   }
 
   bus.on('accept', accept)
