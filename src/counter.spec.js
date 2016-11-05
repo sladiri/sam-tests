@@ -64,17 +64,17 @@ function cleanupAsync ({ stateDispose, actionsDispose, modelDispose }) {
 t('model count increments with value (quick check, async)', t => {
   return (async function* () {
     async function* iterator (bus) {
-      let current = busToPromise(bus, 'accepted', ({ state: { count } }) => count)
+      let subOnce
+      subOnce = busToPromise(bus, 'accepted', ({ state: { count } }) => count)
       bus.emit('accept', { proposal: { count: 0 } })
-      current = await current
+      let current = await subOnce
 
-      let result = await p.check(p.forall(p.integer(), n => {
+      yield await p.check(p.forall(p.integer(), n => {
         current = current + n
-        const next = busToPromise(bus, 'accepted', ({ state: { count } }) => count === current)
+        subOnce = busToPromise(bus, 'accepted', ({ state: { count } }) => count === current)
         bus.emit('accept', { proposal: { count: n } })
-        return next
+        return subOnce
       }))
-      yield result
     }
     const dispose = setupAsync()
     for await (const result of iterator(dispose.bus)) {
