@@ -5,7 +5,7 @@
     "env": "env",
     "clean": "rimraf dist",
     "prebuild": "mkdirp dist",
-    "build": "browserify src/main.js -o dist/main.js -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ] | garnish",
+    "build": "browserify src/main.js --debug -o dist/main.js -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ] | garnish",
     "build:watch": "watch \"npm run build\" src",
     "live": "live-reload index.html dist/ --port 9091",
     "start": "parallelshell \"npm run live\" \"npm run test:watch\" \"npm run build:watch\"",
