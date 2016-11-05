@@ -1,5 +1,7 @@
 {
   "plugins": [
+    // ["transform-runtime", { "polyfill": true, "regenerator": false }],
+    // https://github.com/babel/babel/issues/4783
     "transform-do-expressions",
     "transform-async-generator-functions",
     "transform-function-bind",
