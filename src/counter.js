@@ -17,7 +17,10 @@ export function state ({ bus }) {
 export function action ({ bus }) {
   const actions = {
     increment ({ value }) {
-      return { count: value !== undefined ? value : 1 }
+      if (!value) {
+        throw new Error('invalid input for increment:', value)
+      }
+      return { count: value }
     },
   }
 
@@ -28,7 +31,6 @@ export function action ({ bus }) {
       : actionString === '[object Function]'
         ? action.name
         : undefined
-    console.log('action:', actionName, value)
     const proposal = actions[actionName]({ value })
     bus.emit('accept', { proposal })
   }
@@ -49,7 +51,6 @@ export function model ({ bus }) {
   }
 
   function accept ({ proposal }) {
-    console.log('proposal:', proposal)
     state.count += proposal.count
     bus.emit('accepted', { state })
   }
@@ -57,7 +58,9 @@ export function model ({ bus }) {
   bus.on('accept', accept)
 
   return {
-    state: Object.freeze(JSON.parse(JSON.stringify(state))),
+    state () {
+      return Object.freeze(JSON.parse(JSON.stringify(state)))
+    },
     accept,
     dispose () {
       bus.removeListener('accept', accept)

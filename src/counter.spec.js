@@ -1,7 +1,6 @@
-import test from 'tape'
-import EventEmitter3 from 'eventemitter3'
+import t from 'tape'
+import p from 'jsverify'
 import { state, action, model } from './counter'
-
 
 function setup () {
   const bus = {
@@ -10,11 +9,31 @@ function setup () {
     removeListener () {},
   }
   return {
-    state: state({ bus }),
-    action: action({ bus }),
-    model: model({ bus }),
+    stateInstance: state({ bus }),
+    actionInstance: action({ bus }),
+    modelInstance: model({ bus }),
   }
 }
+
+t('model count starts with 0', t => {
+  const { modelInstance } = setup()
+  t.equal(modelInstance.state().count, 0)
+  t.end()
+})
+
+t('model count increments with value (quick check)', t => {
+  const { modelInstance } = setup()
+  const check = p.forall(p.integer(), n => {
+    const current = modelInstance.state().count
+    modelInstance.accept({ proposal: { count: n } })
+    return modelInstance.state().count === current + n
+  })
+  t.equal(p.check(check), true)
+  t.end()
+})
+
+
+import EventEmitter3 from 'eventemitter3'
 
 function setupAsync () {
   const bus = new EventEmitter3()
@@ -32,14 +51,7 @@ function cleanupAsync ({ bus, stateDispose, actionsDispose, modelDispose }) {
   modelDispose.dispose()
 }
 
-test('model count starts with 0', t => {
-  const { model } = setup()
-  model.accept({ proposal: 0 })
-  t.equal(model.state.count, 0)
-  t.end()
-})
-
-test('model count increments with value async', t => {
+t('model count increments with value (async)', t => {
   t.plan(1)
 
   const dispose = setupAsync()
