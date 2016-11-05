@@ -1,5 +1,6 @@
 import t from 'blue-tape'
 import p from 'jsverify'
+import { coroutine } from 'bluebird'
 import { state, action, model } from './counter'
 
 function setup () {
@@ -35,6 +36,16 @@ t('model count increments with value (quick check)', t => {
 
 import EventEmitter3 from 'eventemitter3'
 
+const busToPromise = (bus, event, mapper) => {
+  const eventHandler = resolve => value => {
+    resolve(mapper(value))
+    bus.removeListener(event, eventHandler)
+  }
+  return new Promise((resolve, reject) => {
+    bus.on(event, eventHandler(resolve))
+  })
+}
+
 function setupAsync () {
   const bus = new EventEmitter3()
   return {
@@ -52,31 +63,24 @@ function cleanupAsync ({ stateDispose, actionsDispose, modelDispose }) {
 }
 
 t('model count increments with value (quick check, async)', t => {
-  const dispose = setupAsync()
-  let current
-  const start = new Promise((resolve, reject) => {
-    function getCurrent ({ state: { count } }) {
-      current = count
-      resolve()
-      dispose.bus.removeAllListeners('accepted')
+  return (async function* () {
+    async function* iterator (bus) {
+      let current = busToPromise(bus, 'accepted', ({ state: { count } }) => count)
+      bus.emit('accept', { proposal: { count: 0 } })
+      current = await current
+
+      let result = await p.check(p.forall(p.integer(), n => {
+        current = current + n
+        const next = busToPromise(bus, 'accepted', ({ state: { count } }) => count === current)
+        bus.emit('accept', { proposal: { count: n } })
+        return next
+      }))
+      yield result
     }
-    dispose.bus.on('accepted', getCurrent)
-  })
-  dispose.bus.emit('accept', { proposal: { count: 0 } })
-  return p.check(p.forall(p.integer(), n => {
-    current = current + n
-    return start.then(() => {
-      const next = new Promise((resolve, reject) => {
-        dispose.bus.on('accepted', ({ state: { count } }) => {
-          resolve(count === current)
-          dispose.bus.removeAllListeners('accepted')
-        })
-      })
-      dispose.bus.emit('accept', { proposal: { count: n } })
-      return next
-    })
-  })).then(result => {
-    t.equal(result, true)
+    const dispose = setupAsync()
+    for await (const result of iterator(dispose.bus)) {
+      t.equal(result, true)
+    }
     cleanupAsync(dispose)
-  })
+  }()).next()
 })
