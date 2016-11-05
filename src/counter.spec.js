@@ -1,8 +1,12 @@
 import test from 'tape'
-import { model, actions } from './counter'
+import { model } from './counter'
 
+const setup = () => {
+  return model(() => {}, () => {})
+}
 
-test('model aborts increment actions after field reaches five', function (t) {
-  [1, 2, 3, 4, 5, 6].forEach(() => actions.increment())
-  t.equal(5, model.field)
+test('model count starts with 0', t => {
+  const fixture = setup()
+  t.equal(fixture.state.count, 0)
+  t.end()
 })
