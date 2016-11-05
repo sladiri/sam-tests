@@ -1,4 +1,4 @@
-import t from 'purple-tape'
+import t from 'blue-tape'
 import p from 'jsverify'
 import { state, action, model } from './counter'
 
@@ -18,6 +18,7 @@ function setup () {
 t('model count starts with 0', t => {
   const { modelInstance } = setup()
   t.equal(modelInstance.state().count, 0)
+  t.end()
 })
 
 t('model count increments with value (quick check)', t => {
@@ -28,6 +29,7 @@ t('model count increments with value (quick check)', t => {
     return modelInstance.state().count === current + n
   })
   t.equal(p.check(check), true)
+  t.end()
 })
 
 
@@ -49,7 +51,7 @@ function cleanupAsync ({ bus, stateDispose, actionsDispose, modelDispose }) {
   modelDispose.dispose()
 }
 
-t('model count increments with value (quick check, async)', function* (t) {
+t('model count increments with value (quick check, async)', t => {
   const dispose = setupAsync()
   let current
   const start = new Promise((resolve, reject) => {
@@ -61,7 +63,7 @@ t('model count increments with value (quick check, async)', function* (t) {
     dispose.bus.on('accepted', getCurrent)
   })
   dispose.bus.emit('accept', { proposal: { count: 0 } })
-  const check = p.check(p.forall(p.integer(), n => {
+  return p.check(p.forall(p.integer(), n => {
     current = current + n
     return start.then(() => {
       const next = new Promise((resolve, reject) => {
@@ -73,7 +75,8 @@ t('model count increments with value (quick check, async)', function* (t) {
       dispose.bus.emit('accept', { proposal: { count: n } })
       return next
     })
-  }))
-  t.equal(yield check, true)
-  cleanupAsync(dispose)
+  })).then(result => {
+    t.equal(result, true)
+    cleanupAsync(dispose)
+  })
 })
