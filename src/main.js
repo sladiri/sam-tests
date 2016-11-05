@@ -1,3 +1,4 @@
+import 'babel-polyfill'
 import yo from 'yo-yo'
 import { state, action, model } from './counter'
 import EventEmitter3 from 'eventemitter3'

@@ -80,23 +80,3 @@ t('model count increments with value (quick check, async)', t => {
     cleanupAsync(dispose)
   })
 })
-
-// t('async generator test', t => {
-//   async function* gg () {
-//     let i = 0
-//     while (i++ < 4) {
-//       yield await new Promise((resolve, reject) => {
-//         setTimeout(() => {
-//           resolve(new Date())
-//         }, 234)
-//       })
-//     }
-//   }
-
-//   return (async function* hh () {
-//     for await (const x of gg()) {
-//       console.log('x', x)
-//       t.equal(42, 42)
-//     }
-//   }()).next()
-// })
