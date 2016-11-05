@@ -1,41 +1,60 @@
-export const actions = ({ server }) => {
+export function state ({ bus }) {
+  function listen ({ state }) {
+    console.log('state:', state)
+    bus.emit('view', { state })
+  }
+
+  bus.on('state', listen)
+
+  return {
+    listen,
+    dispose () {
+      bus.removeListener('state', listen)
+    },
+  }
+}
+
+export function action ({ bus }) {
   const methods = {
     increment ({ value }) {
       return { count: value !== undefined ? value : 1 }
     },
   }
 
-  const propose = ({ action, value }) => {
+  function propose ({ action, value }) {
     console.log('action:', action, value)
     const proposal = methods[action]({ value })
-    server.emit('accept', { proposal })
+    bus.emit('accept', { proposal })
   }
 
-  server.on('action', propose)
+  bus.on('action', propose)
 
   return {
+    methods,
     dispose () {
-      server.removeListener('action', propose)
+      bus.removeListener('action', propose)
     },
   }
 }
 
-export const model = ({ server }) => {
+export function model ({ bus }) {
   const state = {
     count: 0,
   }
 
-  const accept = ({ proposal }) => {
-    console.log('server got proposal:', proposal)
+  function accept ({ proposal }) {
+    console.log('proposal:', proposal)
     state.count += proposal.count
-    server.emit('view', { state })
+    bus.emit('state', { state })
   }
 
-  server.on('accept', accept)
+  bus.on('accept', accept)
 
   return {
+    state: Object.freeze(JSON.parse(JSON.stringify(state))),
+    accept,
     dispose () {
-      server.removeListener('accept', accept)
+      bus.removeListener('accept', accept)
     },
   }
 }
