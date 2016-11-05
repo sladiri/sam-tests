@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sladiri/sam-tests.svg?branch=master)](https://travis-ci.org/sladiri/sam-tests)
+
 ## Purpose
 Some tests, messing with SAM pattern and syntax.
 
