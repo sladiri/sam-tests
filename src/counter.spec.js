@@ -25,7 +25,7 @@ t('model count increments with value (quick check)', t => {
   const { modelInstance } = setup()
   const check = p.forall(p.integer(), n => {
     const current = modelInstance.state().count
-    modelInstance.accept({ proposal: { count: n } })
+    modelInstance.accept({ count: n })
     return modelInstance.state().count === current + n
   })
   t.equal(p.check(check), true)
@@ -66,13 +66,13 @@ t('model count increments with value (quick check, async)', t => {
     async function* iterator (bus) {
       let subOnce
       subOnce = busToPromise(bus, 'accepted', ({ state: { count } }) => count)
-      bus.emit('accept', { proposal: { count: 0 } })
+      bus.emit('accept', { count: 0 })
       let current = await subOnce
 
       yield await p.check(p.forall(p.integer(), n => {
         current = current + n
         subOnce = busToPromise(bus, 'accepted', ({ state: { count } }) => count === current)
-        bus.emit('accept', { proposal: { count: n } })
+        bus.emit('accept', { count: n })
         return subOnce
       }))
     }
