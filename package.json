@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "domvm": "latest",
+    "eventemitter2": "latest",
     "flyd": "latest",
     "tartjs": "latest",
     "trine": "latest",
