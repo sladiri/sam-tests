@@ -42,9 +42,9 @@
     "mkdirp": "latest",
     "parallelshell": "latest",
     "postcss-cssnext": "latest",
+    "purple-tape": "latest",
     "rimraf": "latest",
     "stylelint-config-standard": "latest",
-    "tape": "latest",
     "tape-run": "latest",
     "watch": "latest"
   }
