@@ -1,6 +1,5 @@
 import t from 'blue-tape'
 import p from 'jsverify'
-import { coroutine } from 'bluebird'
 import { state, action, model } from './counter'
 
 function setup () {

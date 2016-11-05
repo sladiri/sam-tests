@@ -34,7 +34,6 @@
     "babel-preset-latest": "latest",
     "babelify": "latest",
     "blue-tape": "latest",
-    "bluebird": "latest",
     "browserify": "latest",
     "colorguard": "latest",
     "css-modulesify": "latest",
