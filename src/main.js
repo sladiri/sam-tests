@@ -1,5 +1,5 @@
 import yo from 'yo-yo'
-import { action, model } from './counter'
+import { state, action, model } from './counter'
 import EventEmitter2 from 'eventemitter2'
 
 
@@ -13,9 +13,11 @@ function stateRep ({ state }) {
   const view = yo`<div>Model count: ${state.count}</div>`
   yo.update(document.body, view)
 }
-bus.on('view', stateRep)
+bus.on('stateRep', stateRep)
 
 document.body.appendChild(yo`<div></div>`)
+state({ bus })
 model({ bus })
 const { methods } = action({ bus })
+
 bus.emit('action', { action: methods.increment, value: 0 })

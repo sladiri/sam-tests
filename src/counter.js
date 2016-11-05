@@ -1,7 +1,7 @@
 export function state ({ bus }) {
   function listen ({ state }) {
     console.log('state:', state)
-    bus.emit('view', { state })
+    bus.emit('stateRep', { state })
   }
 
   bus.on('state', listen)
@@ -22,8 +22,14 @@ export function action ({ bus }) {
   }
 
   function propose ({ action, value }) {
-    console.log('action:', action, value)
-    const proposal = methods[action]({ value })
+    const actionString = Object.prototype.toString.call(action)
+    const actionName = actionString === '[object String]'
+      ? action
+      : actionString === '[object Function]'
+        ? action.name
+        : undefined
+    console.log('action:', actionName, value)
+    const proposal = methods[actionName]({ value })
     bus.emit('accept', { proposal })
   }
 
