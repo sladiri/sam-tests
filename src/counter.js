@@ -17,8 +17,8 @@ export function state ({ bus }) {
 export function action ({ bus }) {
   const actions = {
     increment ({ value }) {
-      if (!value) {
-        throw new Error('invalid input for increment:', value)
+      if (!Number.isInteger(value)) {
+        throw new Error('Input for increment must be integer:', value)
       }
       return { count: value }
     },
