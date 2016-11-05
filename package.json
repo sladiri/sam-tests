@@ -10,9 +10,10 @@
     "live": "live-reload index.html dist/ --port 9091",
     "start": "npm run clean && parallelshell \"npm run live\" \"npm run test:watch\" \"npm run build:watch\"",
     "test:node": "babel-tape-runner src/**/*.spec.js | faucet",
-    "test:browser": "browserify src/**/*.spec.js -t babelify | tape-run | faucet",
+    "test:browser": "browserify src/main.spec.js -t babelify | tape-run | faucet",
     "test": "npm run test:node && npm run test:browser",
     "test:watch": "watch \"npm run test\" src",
+    "test:watch:node": "watch \"npm run test:node\" src",
     "test:watch:browser": "watch \"npm run test:browser\" src"
   },
   "author": "Slađan Ristić",
@@ -26,7 +27,6 @@
     "yo-yo": "latest"
   },
   "devDependencies": {
-    "babel-cli": "latest",
     "babel-plugin-transform-async-generator-functions": "latest",
     "babel-plugin-transform-do-expressions": "latest",
     "babel-plugin-transform-function-bind": "latest",
