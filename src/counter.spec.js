@@ -45,7 +45,7 @@ function setupAsync () {
   }
 }
 
-function cleanupAsync ({ bus, stateDispose, actionsDispose, modelDispose }) {
+function cleanupAsync ({ stateDispose, actionsDispose, modelDispose }) {
   stateDispose.dispose()
   actionsDispose.dispose()
   modelDispose.dispose()
