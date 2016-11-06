@@ -31,4 +31,4 @@ function view ({ state }) {
 }
 document.body.appendChild(yo`<div></div>`)
 bus.on('stateRep', view)
-bus.emit('action', { action: 'reset', sync: true })
+bus.emit('action', { action: 'reset', immediate: true })

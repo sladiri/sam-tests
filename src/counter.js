@@ -2,30 +2,6 @@ export function state ({ bus }) {
   let stepId = 0
   let stack = []
   let blocked = []
-  const actions = Object.freeze({
-    reset ({ stepId, ...args }) {
-      setTimeout(() => {
-        if (!blocked.find(({ action }) => action === 'reset')) {
-          console.log('action - propose reset', { stepId, args, stack: JSON.stringify(stack) })
-          stack.push({ ...args, action: 'reset' })
-          bus.emit('accept', { stepId, count: 0 })
-        } else {
-          console.log('action - blocked reset propose', { stepId, args, stack: JSON.stringify(stack) })
-        }
-      }, args.sync ? 0 : 2000)
-    },
-    incremented ({ stepId, ...args }) {
-      setTimeout(() => {
-        if (!blocked.find(({ action }) => action === 'incremented')) {
-          console.log('action - propose increment:', { stepId, args, stack: JSON.stringify(stack) })
-          stack.push({ ...args, action: 'incremented' })
-          bus.emit('accept', { stepId, increment: args.increment })
-        } else {
-          console.log('action - blocked propose increment', { stepId, args, stack: JSON.stringify(stack) })
-        }
-      }, Number.parseInt(Math.random() * 1000) + 1000)
-    },
-  })
 
   function nap ({ state, _stepId }) {
     const accepted = stack.pop()
@@ -62,6 +38,30 @@ export function state ({ bus }) {
   }
   bus.on('accepted', listen)
 
+  const actions = {
+    reset ({ stepId, ...args }) {
+      setTimeout(() => {
+        if (!blocked.find(({ action }) => action === 'reset')) {
+          console.log('action - propose reset', { stepId, args, stack: JSON.stringify(stack) })
+          stack.push({ ...args, action: 'reset' })
+          bus.emit('accept', { stepId, count: 0 })
+        } else {
+          console.log('action - blocked reset propose', { stepId, args, stack: JSON.stringify(stack) })
+        }
+      }, args.immediate ? 0 : 2000)
+    },
+    incremented ({ stepId, ...args }) {
+      setTimeout(() => {
+        if (!blocked.find(({ action }) => action === 'incremented')) {
+          console.log('action - propose increment:', { stepId, args, stack: JSON.stringify(stack) })
+          stack.push({ ...args, action: 'incremented' })
+          bus.emit('accept', { stepId, increment: args.increment })
+        } else {
+          console.log('action - blocked propose increment', { stepId, args, stack: JSON.stringify(stack) })
+        }
+      }, Number.parseInt(Math.random() * 1000) + 1000)
+    },
+  }
   function propose ({ action, ...args }) {
     const actionFn = actions[action]
     if (Object.prototype.toString.call(actionFn) === '[object Function]') {
