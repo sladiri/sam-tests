@@ -1,6 +1,6 @@
 import t from 'blue-tape'
 import p from 'jsverify'
-import { actions, state, dispatch, model } from './counter'
+import { actions as _actions, state, dispatch, model } from './counter'
 
 function setup () {
   const bus = {
@@ -8,10 +8,11 @@ function setup () {
     emit () {},
     removeListener () {},
   }
+  const actions = _actions({ bus })
   return {
-    actions: actions({ bus }),
-    stateInstance: state({ bus, actions: actions({ bus }) }),
-    dispatchInstance: dispatch({ bus, actions: actions({ bus }) }),
+    actions,
+    stateInstance: state({ bus, actions }),
+    dispatchInstance: dispatch({ bus, actions }),
     modelInstance: model({ bus }),
   }
 }
@@ -26,8 +27,9 @@ t('model count resets to 0', t => {
 t('model count increments with value (quick check)', t => {
   const { modelInstance } = setup()
   const check = p.forall(p.nat(), n => {
-    modelInstance.accept({ count: n })
-    return modelInstance.state().count === n
+    const current = modelInstance.state().count
+    modelInstance.accept({ increment: n })
+    return modelInstance.state().count === n + current
   })
   t.equal(p.check(check), true)
   t.end()
@@ -47,11 +49,12 @@ const busToPromise = (bus, event, mapper) => {
 
 function setupAsync () {
   const bus = new EventEmitter3()
+  const actions = _actions({ bus })
   return {
     bus,
-    actions: actions({ bus }),
-    stateDispose: state({ bus, actions: actions({ bus }) }),
-    dispatchDispose: dispatch({ bus, actions: actions({ bus }) }),
+    actions,
+    stateDispose: state({ bus, actions }),
+    dispatchDispose: dispatch({ bus, actions }),
     modelDispose: model({ bus }),
   }
 }
@@ -65,11 +68,13 @@ function cleanupAsync ({ stateDispose, dispatchDispose, modelDispose }) {
 t('model count increments with value (quick check, async)', t => {
   return (async function* () {
     async function* iterator (bus) {
+      let current = 0
       yield await p.check(p.forall(p.nat(), n => {
+        current += n
         const subOnce = busToPromise(bus, 'accepted', ({ state: { count } }) => {
-          return count === n
+          return count === current
         })
-        bus.emit('accept', { count: n })
+        bus.emit('accept', { increment: n })
         return subOnce
       }))
     }

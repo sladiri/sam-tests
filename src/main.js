@@ -9,12 +9,12 @@ model({ bus })
 state({ bus, actions })
 dispatch({ bus, actions })
 
-function view ({ state, incremented }) {
+function view ({ state }) {
   console.log('view:', state)
   const increment = event => {
     bus.emit('action', {
-      action: incremented,
-      count: state.count + 1,
+      action: 'incremented',
+      increment: 1,
     })
   }
   const style = state.count < 2
@@ -32,4 +32,4 @@ function view ({ state, incremented }) {
 }
 document.body.appendChild(yo`<div></div>`)
 bus.on('stateRep', view)
-bus.emit('action', { action: actions.reset, sync: true })
+bus.emit('action', { action: 'reset', sync: true })
