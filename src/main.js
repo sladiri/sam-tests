@@ -1,13 +1,11 @@
 import 'babel-polyfill'
 import yo from 'yo-yo'
-import { actions as _actions, state, dispatch, model } from './counter'
+import { state, model } from './counter'
 import EventEmitter3 from 'eventemitter3'
 
 const bus = new EventEmitter3()
-const { actions } = _actions({ bus })
 model({ bus })
-state({ bus, actions })
-dispatch({ bus, actions })
+state({ bus })
 
 function view ({ state }) {
   console.log('view:', state)
@@ -28,6 +26,7 @@ function view ({ state }) {
       <button onclick=${increment}>Increment</button>
     </div>`
   yo.update(document.body.firstChild, nextView)
+  console.log('view - rendered')
   bus.emit('render')
 }
 document.body.appendChild(yo`<div></div>`)

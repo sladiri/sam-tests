@@ -1,6 +1,6 @@
 import t from 'blue-tape'
 import p from 'jsverify'
-import { actions as _actions, state, dispatch, model } from './counter'
+import { state, model } from './counter'
 
 function setup () {
   const bus = {
@@ -8,12 +8,9 @@ function setup () {
     emit () {},
     removeListener () {},
   }
-  const actions = _actions({ bus })
   return {
-    actions,
-    stateInstance: state({ bus, actions }),
-    dispatchInstance: dispatch({ bus, actions }),
     modelInstance: model({ bus }),
+    stateInstance: state({ bus }),
   }
 }
 
@@ -59,19 +56,15 @@ const busToPromise = (bus, event, mapper) => {
 
 function setupAsync () {
   const bus = new EventEmitter3()
-  const actions = _actions({ bus })
   return {
     bus,
-    actions,
-    stateDispose: state({ bus, actions }),
-    dispatchDispose: dispatch({ bus, actions }),
     modelDispose: model({ bus }),
+    stateDispose: state({ bus }),
   }
 }
 
-function cleanupAsync ({ stateDispose, dispatchDispose, modelDispose }) {
+function cleanupAsync ({ stateDispose, modelDispose }) {
   stateDispose.dispose()
-  dispatchDispose.dispose()
   modelDispose.dispose()
 }
 

@@ -1,81 +1,75 @@
-let stepId = 0
-let prog = []
-let blocked = []
-export function actions ({ bus }) {
-  return {
-    actions: Object.freeze({
-      reset ({ stepId, args }) {
-        setTimeout(() => {
-          if (!blocked.find(({ action }) => action === 'reset')) {
-            prog.push({ action: 'reset', args })
-            console.log('action - propose reset', { stepId, sync: args.sync, blocked })
-            bus.emit('accept', { stepId, count: 0 })
-          } else {
-            console.log('action - blocked propose', { stepId, sync: args.sync, blocked })
-          }
-        }, args.sync ? 0 : 2000)
-      },
-      incremented ({ stepId, args }) {
-        setTimeout(() => {
-          if (!blocked.find(({ action }) => action === 'incremented')) {
-            prog.push({ action: 'incremented', args })
-            console.log('action - propose increment:', { stepId, increment: args.increment, blocked })
-            bus.emit('accept', { stepId, increment: args.increment })
-          } else {
-            console.log('action - blocked propose', { stepId, increment: args.increment, blocked })
-          }
-        }, Number.parseInt(Math.random() * 1000) + 1000)
-      },
-    }),
-  }
-}
-export function state ({ bus, actions }) {
-  function nap ({ _stepId, state, actions }) {
-    if (prog.length > 0) {
-      console.log('nap - prog:', { stepId, _stepId, state, prog })
-      const firstArgs = prog.pop()
-      bus.emit('action', firstArgs)
+export function state ({ bus }) {
+  let stepId = 0
+  let stack = []
+  let blocked = []
+  const actions = Object.freeze({
+    reset ({ stepId, ...args }) {
+      setTimeout(() => {
+        if (!blocked.find(({ action }) => action === 'reset')) {
+          console.log('action - propose reset', { stepId, args, stack: JSON.stringify(stack) })
+          stack.push({ ...args, action: 'reset' })
+          bus.emit('accept', { stepId, count: 0 })
+        } else {
+          console.log('action - blocked reset propose', { stepId, args, stack: JSON.stringify(stack) })
+        }
+      }, args.sync ? 0 : 2000)
+    },
+    incremented ({ stepId, ...args }) {
+      setTimeout(() => {
+        if (!blocked.find(({ action }) => action === 'incremented')) {
+          console.log('action - propose increment:', { stepId, args, stack: JSON.stringify(stack) })
+          stack.push({ ...args, action: 'incremented' })
+          bus.emit('accept', { stepId, increment: args.increment })
+        } else {
+          console.log('action - blocked propose increment', { stepId, args, stack: JSON.stringify(stack) })
+        }
+      }, Number.parseInt(Math.random() * 1000) + 1000)
+    },
+  })
+
+  function nap ({ state, _stepId }) {
+    const accepted = stack.pop()
+    console.log('nap - removed from stack:', { stepId, _stepId, action: accepted.action, stack: JSON.stringify(stack) })
+
+    if (stack.length > 0) {
+      const args = stack.pop()
+      console.log('nap - emit from stack:', { stepId, _stepId, action: args.action, stack: JSON.stringify(stack) })
+      bus.emit('action', args)
     }
+
     if (state.count > 4) {
-      console.log('nap - reset:', { stepId, _stepId, state, prog })
+      console.log('nap - emit reset:', { stepId, _stepId, count: state.count })
       bus.emit('action', { action: 'reset' })
     }
   }
 
-  function listen ({ stepId: _stepId, state }) {
-    console.log('state - accepted:', { stepId, _stepId, count: state.count, prog })
-    stepId += 1
-    prog.pop()
-    if (state.count > 4) {
-      blocked.push({ action: 'incremented', stepId })
-    } else if (state.count < 1) {
-      blocked = blocked.filter(({ action }) => action !== 'incremented')
+  function listen ({ error = false, stepId: _stepId, state }) {
+    console.log('state - accepted:', { error, stepId, _stepId, stack: JSON.stringify(stack) })
+
+    if (error) {
+      nap({ state, _stepId })
+    } else {
+      if (state.count > 4) {
+        blocked.push({ action: 'incremented', stepId })
+      } else if (state.count < 1) {
+        blocked = blocked.filter(({ action }) => action !== 'incremented')
+      }
+      bus.once('render', () => nap({ state, _stepId }))
+      bus.emit('stateRep', { state })
     }
-    bus.emit('stateRep', { state })
-    bus.once('render', () => nap({ _stepId, state, actions }))
+
+    stepId += 1
   }
   bus.on('accepted', listen)
-  bus.on('rejected', () => {
-    prog.pop()
-  })
 
-  return {
-    listen,
-    dispose () {
-      bus.removeListener('accepted', listen)
-    },
-  }
-}
-export function dispatch ({ bus, actions }) {
-  function propose (args) {
-    const { action } = args
+  function propose ({ action, ...args }) {
     const actionFn = actions[action]
     if (Object.prototype.toString.call(actionFn) === '[object Function]') {
       if (!blocked.find(({ action: name }) => name === action)) {
-        console.log('dispatch - action:', { stepId, action, prog })
-        actions[args.action]({ stepId, args })
+        console.log('dispatch - call action:', { stepId, action, args })
+        actions[action]({ ...args, stepId })
       } else {
-        console.log('dispatch - blocked action:', { stepId, action, prog })
+        console.log('dispatch - blocked action:', { stepId, action })
       }
     } else {
       console.log('dispatch - invalid action:', { stepId, action })
@@ -84,7 +78,9 @@ export function dispatch ({ bus, actions }) {
   bus.on('action', propose)
 
   return {
+    listen,
     dispose () {
+      bus.removeListener('accepted', listen)
       bus.removeListener('action', propose)
     },
   }
@@ -96,23 +92,32 @@ export function model ({ bus }) {
   }
 
   function accept ({ stepId, ...args }) {
-    console.log('model - proposal', { stepId, args })
     if (args.increment !== undefined) {
       const { increment } = args
       if (!Number.isInteger(increment)) {
-        console.log('model - input for increment must be integer:', increment)
+        console.log('model - input for increment must be integer:', { increment })
+        bus.emit('accepted', { error: true, stepId, state })
       } else if (increment >= 0) {
+        console.log('model - increment proposal', { stepId, increment })
         state.count += increment
         bus.emit('accepted', { stepId, state })
       } else {
-        bus.emit('rejected')
         console.log('model - rejected increment:', { stepId, increment })
+        bus.emit('accepted', { error: true, stepId, state })
       }
     } else if (args.count !== undefined) {
-      state.count = args.count
-      bus.emit('accepted', { stepId, state })
+      const { count } = args
+      if (!Number.isInteger(count)) {
+        console.log('model - input for count must be integer:', { count })
+        bus.emit('accepted', { error: true, stepId, state })
+      } else {
+        console.log('model - count proposal', { stepId, count })
+        state.count = args.count
+        bus.emit('accepted', { stepId, state })
+      }
     } else {
       console.log('model - invalid args:', { stepId, args })
+      bus.emit('accepted', { error: true, stepId, state })
     }
   }
   bus.on('accept', accept)
