@@ -1,38 +1,34 @@
-function actions ({ bus }) {
-  let resetId = null
-  return {
-    reset ({ value: { sync } }) {
+let _actions = null
+export function actions ({ bus }) {
+  _actions = _actions || {
+    reset ({ sync }) {
       console.log('action - propose reset', sync)
-      if (!resetId) {
-        resetId = setTimeout(() => {
-          bus.emit('accept', { count: null })
-          resetId = null
-        }, sync ? 0 : 2000)
-      }
+      setTimeout(() => {
+        bus.emit('accept', { count: 0 })
+      }, sync ? 0 : 2000)
     },
-    incremented ({ value: { count } }) {
+    incremented ({ count }) {
       console.log('action - propose increment:', count)
-      if (!Number.isInteger(count)) {
-        throw new Error('Input for increment must be integer:', count)
-      }
       bus.emit('accept', { count })
     },
   }
+  return {
+    actions: Object.freeze(_actions),
+  }
 }
 
-export function state ({ bus }) {
-  const _actions = actions({ bus })
-  function nap ({ _actions, state }) {
+export function state ({ bus, actions }) {
+  function nap ({ state, actions }) {
     if (state.count > 5) {
       console.log('nap:', state)
-      bus.emit('action', { action: _actions.reset, value: {} })
+      bus.emit('action', { action: actions.reset })
     }
   }
 
   function listen ({ state }) {
     console.log('state - accepted:', state)
-    bus.emit('stateRep', { state })
-    bus.once('render', () => nap({ _actions, state }))
+    bus.emit('stateRep', { state, actions })
+    bus.once('render', () => nap({ state, actions }))
   }
   bus.on('accepted', listen)
 
@@ -44,21 +40,24 @@ export function state ({ bus }) {
   }
 }
 
-export function action ({ bus }) {
-  const _actions = actions({ bus })
-  function propose ({ action, value }) {
+export function dispatch ({ bus, actions }) {
+  function propose (args) {
+    const { action } = args
     const actionString = Object.prototype.toString.call(action)
     const actionName = actionString === '[object String]'
       ? action
       : actionString === '[object Function]'
         ? action.name
         : undefined
-    _actions[actionName]({ value })
+    if (actionName && Object.prototype.toString.call(actions[actionName]) === '[object Function]') {
+      actions[actionName](args)
+    } else {
+      console.warn('Invalid action:', actionName)
+    }
   }
   bus.on('action', propose)
 
   return {
-    actions: _actions,
     dispose () {
       bus.removeListener('action', propose)
     },
@@ -72,8 +71,15 @@ export function model ({ bus }) {
 
   function accept ({ count }) {
     console.log('model - proposal', count)
-    state.count = count === null ? 0 : state.count + count
-    bus.emit('accepted', { state })
+    if (!Number.isInteger(count)) {
+      console.warn('model - input for count must be integer:', count)
+    }
+    if (count >= 0) {
+      state.count = count
+      bus.emit('accepted', { state })
+    } else {
+      console.warn('model - rejected increment:', count)
+    }
   }
   bus.on('accept', accept)
 
