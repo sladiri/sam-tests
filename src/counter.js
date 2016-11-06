@@ -11,16 +11,27 @@ export function actions ({ bus }) {
         setTimeout(() => {
           console.log('action - propose increment:', { stepId, increment })
           bus.emit('accept', { stepId, increment })
-        }, Number.parseInt(Math.random() * 1000) + 500)
+        }, Number.parseInt(Math.random() * 1000) + 1000)
       },
     }),
   }
 }
 
 let stepId = 0
+let prog = []
+// let blocked = []
 export function state ({ bus, actions }) {
+  function popFirstArgs () {
+    const [firstArgs, ...remaining] = prog
+    prog = remaining
+    return firstArgs
+  }
   // TODO: Prevent old resets.
   function nap ({ _stepId, state, actions }) {
+    if (prog.length > 0) {
+      const firstArgs = popFirstArgs()
+      bus.emit('action', firstArgs)
+    }
     if (state.count > 5) {
       console.log('nap:', { stepId, _stepId, state })
       bus.emit('action', { action: 'reset' })
@@ -29,7 +40,8 @@ export function state ({ bus, actions }) {
 
   // TODO: Queue actions to nap against stale data
   function listen ({ stepId: _stepId, state }) {
-    console.log('state - accepted:', { stepId, _stepId, state })
+    console.log('state - accepted:', { stepId, _stepId, state, prog })
+    popFirstArgs()
     bus.emit('stateRep', { state })
     bus.once('render', () => nap({ _stepId, state, actions }))
     stepId += 1
@@ -48,8 +60,15 @@ export function dispatch ({ bus, actions }) {
     const { action } = args
     const actionFn = actions[action]
     if (Object.prototype.toString.call(actionFn) === '[object Function]') {
-      console.log('dispatch - action:', { stepId, action })
-      actionFn({ stepId, args })
+      prog.push(args)
+      if (prog.length < 2) {
+        console.log('dispatch - action:', { stepId, action })
+        actionFn({ stepId, args })
+      } else {
+        console.log('dispatch - queued action:', { stepId, action, prog })
+        const [firstArgs] = prog
+        actions[firstArgs.action]({ stepId, args: firstArgs })
+      }
     } else {
       console.warn('dispatch - invalid action:', { stepId, action })
     }
