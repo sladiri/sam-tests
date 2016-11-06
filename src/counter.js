@@ -10,6 +10,8 @@ export function actions ({ bus }) {
             prog.push({ action: 'reset', args })
             console.log('action - propose reset', { stepId, sync: args.sync, blocked })
             bus.emit('accept', { stepId, count: 0 })
+          } else {
+            console.log('action - blocked propose', { stepId, sync: args.sync, blocked })
           }
         }, args.sync ? 0 : 2000)
       },
@@ -19,6 +21,8 @@ export function actions ({ bus }) {
             prog.push({ action: 'incremented', args })
             console.log('action - propose increment:', { stepId, increment: args.increment, blocked })
             bus.emit('accept', { stepId, increment: args.increment })
+          } else {
+            console.log('action - blocked propose', { stepId, increment: args.increment, blocked })
           }
         }, Number.parseInt(Math.random() * 1000) + 1000)
       },
@@ -70,6 +74,8 @@ export function dispatch ({ bus, actions }) {
       if (!blocked.find(({ action: name }) => name === action)) {
         console.log('dispatch - action:', { stepId, action, prog })
         actions[args.action]({ stepId, args })
+      } else {
+        console.log('dispatch - blocked action:', { stepId, action, prog })
       }
     } else {
       console.log('dispatch - invalid action:', { stepId, action })
