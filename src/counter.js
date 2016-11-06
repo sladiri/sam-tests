@@ -21,13 +21,13 @@ export function state ({ bus, actions }) {
   function nap ({ state, actions }) {
     if (state.count > 5) {
       console.log('nap:', state)
-      bus.emit('action', { action: actions.reset })
+      bus.emit('action', { action: actions.reset }) // TODO: Prevent old resets.
     }
   }
 
-  function listen ({ state }) {
+  function listen ({ state }) { // TODO: Queue actions to nap against stale data
     console.log('state - accepted:', state)
-    bus.emit('stateRep', { state, actions })
+    bus.emit('stateRep', { state, incremented: actions.incremented })
     bus.once('render', () => nap({ state, actions }))
   }
   bus.on('accepted', listen)

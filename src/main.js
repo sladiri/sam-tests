@@ -9,11 +9,11 @@ model({ bus })
 state({ bus, actions })
 dispatch({ bus, actions })
 
-function view ({ state, actions }) {
+function view ({ state, incremented }) {
   console.log('view:', state)
   const increment = event => {
     bus.emit('action', {
-      action: actions.incremented,
+      action: incremented,
       count: state.count + 1,
     })
   }
