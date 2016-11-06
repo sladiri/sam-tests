@@ -35,6 +35,16 @@ t('model count increments with value (quick check)', t => {
   t.end()
 })
 
+t('model count increments only with positive numbers (quick check)', t => {
+  const { modelInstance } = setup()
+  const check = p.forall(p.integer(Number.MIN_SAFE_INTEGER, 0), n => {
+    modelInstance.accept({ increment: n })
+    return modelInstance.state().count === 0
+  })
+  t.equal(p.check(check), true)
+  t.end()
+})
+
 
 import EventEmitter3 from 'eventemitter3'
 
