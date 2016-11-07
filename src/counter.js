@@ -5,7 +5,7 @@ export function state ({ bus }) {
 
   function nap ({ state, _stepId }) {
     const accepted = stack.pop()
-    console.log('nap - removed from stack:', { stepId, _stepId, action: accepted.action, stack: JSON.stringify(stack) })
+    console.log('nap - removed from stack:', { stepId, _stepId, accepted: accepted.action, stack: JSON.stringify(stack) })
 
     if (stack.length > 0) {
       const args = stack.pop()
@@ -46,18 +46,18 @@ export function state ({ bus }) {
           stack.push({ ...args, action: 'reset' })
           bus.emit('accept', { stepId, count: 0 })
         } else {
-          console.log('action - blocked reset propose', { stepId, args, stack: JSON.stringify(stack) })
+          console.log('action - blocked propose reset', { stepId, args, stack: JSON.stringify(stack) })
         }
       }, args.immediate ? 0 : 2000)
     },
-    incremented ({ stepId, ...args }) {
+    incremented ({ stepId: _stepId, ...args }) {
       setTimeout(() => {
         if (!blocked.find(({ action }) => action === 'incremented')) {
-          console.log('action - propose increment:', { stepId, args, stack: JSON.stringify(stack) })
+          console.log('action - propose increment:', { stepId, _stepId, args, stack: JSON.stringify(stack) })
           stack.push({ ...args, action: 'incremented' })
           bus.emit('accept', { stepId, increment: args.increment })
         } else {
-          console.log('action - blocked propose increment', { stepId, args, stack: JSON.stringify(stack) })
+          console.log('action - blocked propose increment', { stepId, _stepId, args, stack: JSON.stringify(stack) })
         }
       }, Number.parseInt(Math.random() * 1000) + 1000)
     },
