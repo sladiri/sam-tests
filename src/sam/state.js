@@ -3,8 +3,8 @@ export function nap (model) {
   return []
 }
 
-export function onModel ({payload}) {
-  const model = payload
+export function onModel (payload) {
+  const {model} = payload
   let stateRepresentation
   if (model) {
     stateRepresentation = 'initial'

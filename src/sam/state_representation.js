@@ -43,16 +43,16 @@ export const views = {
   },
 }
 
-export function onStateRepresentation ({payload}) {
+export function onStateRepresentation (payload) {
   const {stateRepresentation, model} = payload
   const view = views[stateRepresentation](model)
   if (typeof window === 'undefined') {
-    console.log('no DOM', view)
+    console.log(`no DOM for state-repesentation: ${stateRepresentation}`)
   } else {
     renderDom(view)
   }
   return {
-    render: model,
+    render: null,
   }
 }
 

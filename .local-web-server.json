@@ -1,0 +1,11 @@
+{
+  "spa": "index.html",
+  "mocks": [
+    {
+      "route": "/foo",
+      "response": {
+        "body": "<h1>Welcome to the Mock Responses example</h1>"
+      }
+    }
+  ]
+}

@@ -1,5 +1,7 @@
+import {type} from 'ramda'
+
 function clone (object) {
-  return JSON.stringify(JSON.parse(object))
+  return JSON.parse(JSON.stringify(object))
 }
 
 export const initialState = {
@@ -7,9 +9,11 @@ export const initialState = {
 }
 
 export function model (state) {
-  return function onPropose ({payload}) {
-    const proposal = payload
-    if (proposal) { state.field += 1 }
+  return function onPropose (payload) {
+    const {proposal} = payload
+    if (type(proposal) === 'Number' && proposal > 0) {
+      state.field += proposal
+    }
     return {
       model: clone(state),
     }
