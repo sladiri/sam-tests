@@ -1,11 +1,11 @@
 {
   "name": "sam-tests",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "scripts": {
     "env": "env",
     "clean": "rimraf dist",
     "prebuild": "mkdirp dist",
-    "build": "browserify src/main.js --debug -o dist/main.js -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ]",
+    "build": "browserify src/index.js --debug -o dist/index.js -t babelify -p [ css-modulesify -o dist/main.css --before colorguard --after postcss-cssnext ]",
     "build:watch": "watch \"npm run build\" src | garnish",
     "live": "live-reload index.html dist/ --port 9091",
     "start": "npm run clean && parallelshell \"npm run live\" \"npm run test:watch\" \"npm run build:watch\"",
@@ -17,14 +17,6 @@
   "author": "Slađan Ristić",
   "license": "ISC",
   "dependencies": {
-    "domvm": "latest",
-    "eventemitter3": "latest",
-    "flyd": "latest",
-    "tartjs": "latest",
-    "trine": "latest",
-    "yo-yo": "latest"
-  },
-  "devDependencies": {
     "babel-cli": "latest",
     "babel-plugin-transform-async-generator-functions": "latest",
     "babel-plugin-transform-do-expressions": "latest",
@@ -38,15 +30,22 @@
     "colorguard": "latest",
     "css-modulesify": "latest",
     "faucet": "latest",
+    "flyd": "latest",
     "garnish": "latest",
+    "hyperscript": "latest",
     "jsverify": "latest",
     "live-reload": "latest",
     "mkdirp": "latest",
+    "morphdom": "latest",
     "parallelshell": "latest",
     "postcss-cssnext": "latest",
     "rimraf": "latest",
+    "sockjs-client": "latest",
+    "stompjs": "github:thoughtwire/stomp-websocket",
     "stylelint-config-standard": "latest",
     "tape-run": "latest",
+    "trine": "latest",
     "watch": "latest"
-  }
+  },
+  "devDependencies": {}
 }
