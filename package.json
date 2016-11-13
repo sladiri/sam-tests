@@ -55,9 +55,10 @@
     "ramda": "latest",
     "rimraf": "latest",
     "sockjs-client": "latest",
-    "stompjs": "github:thoughtwire/stomp-websocket",
+    "stompjs": "git://github.com/thoughtwire/stomp-websocket#master",
     "stylelint-config-standard": "latest",
     "tape": "latest",
+    "tape-run": "latest",
     "trine": "latest",
     "watch": "latest"
   },
