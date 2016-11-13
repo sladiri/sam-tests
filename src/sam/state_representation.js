@@ -77,9 +77,7 @@ export function onStateRepresentation (payload) {
   } else {
     renderDom(view)
   }
-  return {
-    render: null,
-  }
+  return {render: null}
 }
 
 export function connect () {
