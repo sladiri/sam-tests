@@ -9,19 +9,23 @@ let state = {
 
 function onPropose (payload = {}) {
   const {field, initialRender} = payload
-
   if (field > 0) {
     state.field += field
   } else if (initialRender === false) {
     state.initialRender = false
   }
-
-  return {model: clone(state)}
+  return {
+    model: clone(state),
+  }
 }
 
-export function connect (initialState) {
+export function model (initialState) {
   state = initialState || state
+  return onPropose
+}
+
+export function connect (state) {
   return {
-    propose: onPropose,
+    propose: model(state),
   }
 }
