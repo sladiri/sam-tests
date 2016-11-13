@@ -1,33 +1,30 @@
 import SockJS from 'sockjs-client'
 import Stomp from 'stompjs'
-import {type} from 'ramda'
 
-const targetPrefix = '/exchange/'
 
-function getClient (getOnConnect, getOnError) {
-  const url = 'http://127.0.0.1:15674/stomp'
-  const webSocket = new SockJS(url)
-  const client = Stomp.over(webSocket)
-  client.heartbeat.outgoing = 0
-  client.heartbeat.incoming = 0
-  client.debug = function onDebug (message) {
-    console.log(`DEBUG: ${message}`)
-  }
+if (global.process && process.platform === 'win32') {
+  require('readline')
+    .createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    })
+    .on('SIGINT', function () {
+      process.emit('SIGINT')
+    })
+}
 
-  client.connect('guest', 'guest', getOnConnect(client), getOnError(client), '/')
-
+function handleSIGINT ({webSocket, client}) {
   if (global.process) {
-    process.on('SIGINT', function handleSIGINT () {
-      console.log('Disconnecting STOMP client.')
-      client.disconnect(function onDisconnect () {
-        console.log(`Closing WebSocket to ${url}`)
+    process.on('SIGINT', function () {
+      client.disconnect(function () {
         webSocket.close()
         process.exit()
       })
     })
   }
-  return client
 }
+
+const targetPrefix = '/exchange/'
 
 function parseRegistered (registered, handler) {
   return Object.keys(registered)
@@ -47,21 +44,9 @@ export function sendAll ({client, ...registered}) {
 }
 
 export function stompActor (options = {}) {
-  if (global.process && options.single !== true) {
-    if (process.platform === 'win32') {
-      require('readline')
-        .createInterface({
-          input: process.stdin,
-          output: process.stdout,
-        })
-        .on('SIGINT', function () {
-          process.emit('SIGINT')
-        })
-    }
-  }
   return parseRegistered(options, function wireStompActor ({target, data: handler}) {
     return new Promise(function stompPromise (resolve, reject) {
-      const getOnConnect = client => function onConnect () {
+      function onConnect () {
         const sub = client.subscribe(`${targetPrefix}${target}`, function onMessage (message) {
           const responses = handler(JSON.parse(message.body))
           sendAll({client, ...responses})
@@ -78,10 +63,21 @@ export function stompActor (options = {}) {
           },
         })
       }
-      const getOnError = client => function onError (error) {
+      function onError (error) {
         console.log(`ERROR: ${error}}`)
       }
-      getClient(getOnConnect, getOnError)
+
+      const webSocket = new SockJS('http://127.0.0.1:15674/stomp')
+      const client = Stomp.over(webSocket)
+      client.heartbeat.outgoing = 0
+      client.heartbeat.incoming = 0
+      client.debug = function onDebug (message) {
+        console.log(`DEBUG: ${message}`)
+      }
+
+      client.connect('guest', 'guest', onConnect, onError, '/')
+
+      handleSIGINT({webSocket, client})
     })
   })
 }
