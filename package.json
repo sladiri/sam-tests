@@ -2,7 +2,6 @@
   "name": "sam-tests",
   "version": "0.0.1",
   "scripts": {
-    "whoo": "",
     "env": "env",
     "clean": "rimraf dist",
     "prebuild-cmd": "mkdirp dist",
