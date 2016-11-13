@@ -16,9 +16,10 @@
     "start:state": "babel-node ./src/stomp/state_actor.js",
     "start:model": "babel-node ./src/stomp/model_actor.js",
     "start": "npm run clean && parallelshell \"npm run start:state_rep\" \"npm run start:state\" \"npm run start:model\" \"npm run start:webserver\" \"npm run live\" \"npm run build:watch\" \"npm run test:watch\"",
-    "test:node": "tape -r babel-register src/**/*.spec.js | faucet",
+    "test:node-cmd": "tape -r babel-register src/**/*.spec.js",
+    "test:node": "npm run test:node-cmd | faucet",
     "test:browser": "npm run build-cmd -- --debug --entry src/**/*.spec.js | tape-run | faucet",
-    "test": "npm run test:node && npm run test:browser",
+    "test": "npm run test:node",
     "test:watch": "watch \"npm run test:node\" src"
   },
   "author": "Slađan Ristić",
@@ -53,7 +54,7 @@
     "sockjs-client": "latest",
     "stompjs": "github:thoughtwire/stomp-websocket",
     "stylelint-config-standard": "latest",
-    "tape-run": "latest",
+    "tape": "^4.6.2",
     "trine": "latest",
     "watch": "latest"
   },

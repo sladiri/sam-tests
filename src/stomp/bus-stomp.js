@@ -4,6 +4,31 @@ import {type} from 'ramda'
 
 const targetPrefix = '/exchange/'
 
+function getClient (getOnConnect, getOnError) {
+  const url = 'http://127.0.0.1:15674/stomp'
+  const webSocket = new SockJS(url)
+  const client = Stomp.over(webSocket)
+  client.heartbeat.outgoing = 0
+  client.heartbeat.incoming = 0
+  client.debug = function onDebug (message) {
+    console.log(`DEBUG: ${message}`)
+  }
+
+  client.connect('guest', 'guest', getOnConnect(client), getOnError(client), '/')
+
+  if (global.process) {
+    process.on('SIGINT', function handleSIGINT () {
+      console.log('Disconnecting STOMP client.')
+      client.disconnect(function onDisconnect () {
+        console.log(`Closing WebSocket to ${url}`)
+        webSocket.close()
+        process.exit()
+      })
+    })
+  }
+  return client
+}
+
 function parseRegistered (registered, handler) {
   return Object.keys(registered).map(key => {
     return {
@@ -24,7 +49,7 @@ export function sendAll ({client, ...registered}) {
   })
 }
 
-export function stomp (options = {}) {
+export function stompActor (options = {}) {
   if (global.process && options.single !== true) {
     if (process.platform === 'win32') {
       require('readline')
@@ -39,13 +64,7 @@ export function stomp (options = {}) {
   }
   return parseRegistered(options, function wireStompActor ({target, data: handler}) {
     return new Promise(function stompPromise (resolve, reject) {
-      const url = 'http://127.0.0.1:15674/stomp'
-      const webSocket = new SockJS(url)
-      const client = Stomp.over(webSocket)
-      client.heartbeat.outgoing = 0
-      client.heartbeat.incoming = 0
-
-      function onConnect () {
+      const getOnConnect = client => function onConnect () {
         const sub = client.subscribe(`${targetPrefix}${target}`, function onMessage (message) {
           const responses = handler(JSON.parse(message.body))
           sendAll({client, ...responses})
@@ -62,27 +81,10 @@ export function stomp (options = {}) {
           },
         })
       }
-
-      function onError (error) {
+      const getOnError = client => function onError (error) {
         console.log(`ERROR: ${error}}`)
-      };
-
-      client.debug = function onDebug (message) {
-        console.log(`DEBUG: ${message}`)
       }
-
-      client.connect('guest', 'guest', onConnect, onError, '/')
-
-      if (global.process) {
-        process.on('SIGINT', function handleSIGINT () {
-          console.log(`Disconnecting client for ${target}`)
-          client.disconnect(function onDisconnect () {
-            console.log(`Closing WebSocket to ${url}`)
-            webSocket.close()
-            process.exit()
-          })
-        })
-      }
+      getClient(getOnConnect, getOnError)
     })
   })
 }

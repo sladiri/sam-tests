@@ -1,15 +1,5 @@
 import 'babel-polyfill'
-import {stomp, sendAll} from './bus-stomp'
-import {initialState, connect} from '../sam/model'
+import {stompActor} from './bus-stomp'
+import {connect} from '../sam/model'
 
-Promise.all(stomp(connect())).then(([{client}]) => {
-  setTimeout(() => {
-    sendAll({
-      client,
-      stateRepresentation: {
-        stateRepresentation: 'initial',
-        model: initialState,
-      },
-    })
-  }, 100)
-})
+stompActor(connect())
