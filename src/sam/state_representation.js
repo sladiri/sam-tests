@@ -1,5 +1,25 @@
 import morphdom from 'morphdom'
 import h from 'hyperscript'
+import {stompActor, sendAll} from '../stomp/bus-stomp'
+import * as actions from './actions'
+
+const signal = Promise.all(stompActor({'amq.direct': () => {}})).then(([{client}]) => {
+  return action => {
+    sendAll({client, ...action})
+  }
+})
+
+signal.then(signal => {
+  setTimeout(() => {
+    signal(actions.initialise())
+  }, 1000)
+})
+
+const increment = value => {
+  signal.then(signal => {
+    signal(actions.increment({value}))
+  })
+}
 
 function renderDom (domNode) {
   document.body.children.length === 0
@@ -12,7 +32,13 @@ function pCount ({field}) {
 }
 
 function button ({disabled}) {
-  return h('button', {onclick: ::console.log, disabled}, 'Increment Button')
+  return h('button', {
+    onclick: e => {
+      console.log('whoooo', increment)
+      increment(1)
+    },
+    disabled,
+  }, 'Increment Button')
 }
 
 function root ({children}) {

@@ -1,14 +1,11 @@
 export function nap (model) {
   console.log('no nap yet')
-  return []
+  return {}
 }
 
 export function onModel (payload) {
-  const {model} = payload
-  let stateRepresentation
-  if (model) {
-    stateRepresentation = 'initial'
-  }
+  const model = payload
+  let stateRepresentation = 'initial'
   return {
     stateRepresentation: {stateRepresentation, model},
   }

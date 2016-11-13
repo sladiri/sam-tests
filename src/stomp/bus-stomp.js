@@ -30,21 +30,18 @@ function getClient (getOnConnect, getOnError) {
 }
 
 function parseRegistered (registered, handler) {
-  return Object.keys(registered).map(key => {
-    return {
-      target: key,
-      data: registered[key],
-    }
-  })
-  .filter(({target, data}) => {
-    return (type(target) === 'String' && type(handler) === 'Function')
-  })
-  .map(handler)
+  return Object.keys(registered)
+    .map(key => {
+      return {
+        target: key,
+        data: registered[key],
+      }
+    })
+    .map(handler)
 }
 
 export function sendAll ({client, ...registered}) {
   parseRegistered(registered, function send ({target, data: payload}) {
-    console.log('sending payload', payload)
     client.send(`${targetPrefix}${target}`, {}, JSON.stringify(payload))
   })
 }
