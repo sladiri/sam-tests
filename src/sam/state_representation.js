@@ -1,18 +1,17 @@
 import morphdom from 'morphdom'
 import h from 'hyperscript'
-import {stompActor, sendAll} from '../stomp/bus-stomp'
+import {stompConnect, sendAll} from '../stomp/bus_stomp'
 import * as actions from './actions'
 
-const signal = Promise.all(stompActor({'amq.direct': () => {}})).then(([{client}]) => {
-  return action => {
+const signalOptions = {destination: 'exchange', 'amq.direct': () => {}}
+const signal = Promise.all(stompConnect(signalOptions))
+  .then(([{client}]) => action => {
     sendAll({client, ...action})
   }
-})
+)
 
 signal.then(signal => {
-  setTimeout(() => {
-    signal(actions.initialise())
-  }, 1000)
+  signal(actions.initialise())
 })
 
 const increment = value => {
@@ -81,7 +80,5 @@ export function onStateRepresentation (payload) {
 }
 
 export function connect () {
-  return {
-    stateRepresentation: onStateRepresentation,
-  }
+  return {state_representation: onStateRepresentation}
 }

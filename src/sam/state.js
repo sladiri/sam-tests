@@ -6,9 +6,7 @@ export function nap (model) {
 export function onModel (payload) {
   const model = payload
   let stateRepresentation = 'initial'
-  return {
-    stateRepresentation: {stateRepresentation, model},
-  }
+  return {state_representation: {stateRepresentation, model}}
 }
 
 export function connect () {

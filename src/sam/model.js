@@ -14,9 +14,7 @@ function onPropose (payload = {}) {
   } else if (initialRender === false) {
     state.initialRender = false
   }
-  return {
-    model: clone(state),
-  }
+  return {model: clone(state)}
 }
 
 export function model (initialState) {
@@ -25,7 +23,5 @@ export function model (initialState) {
 }
 
 export function connect (state) {
-  return {
-    propose: model(state),
-  }
+  return {propose: model(state)}
 }
