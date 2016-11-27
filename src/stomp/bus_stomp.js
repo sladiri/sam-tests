@@ -90,7 +90,7 @@ export function stompConnect ({
         })
       }
       function onError (error) {
-        console.log(`ERROR: ${error}}`)
+        console.log(`ERROR: ${error}`)
       }
 
       client.connect(user, pass, onConnect, onError, vhost)
