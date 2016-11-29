@@ -1,5 +1,6 @@
 import SockJS from 'sockjs-client'
 import Stomp from 'stompjs'
+import {type} from 'ramda'
 
 
 if (global.process && process.platform === 'win32') {
@@ -27,9 +28,10 @@ function handleSIGINT ({webSocket, client}) {
 function parseRegistered (registered, handler) {
   return Object.keys(registered)
     .map(key => {
+      const data = registered[key]
       return {
         target: key,
-        data: registered[key],
+        data,
       }
     })
     .map(handler)
@@ -44,14 +46,18 @@ const DESTINATION = 'queue'
 
 export function sendAll ({client, destination = DESTINATION, stompOpts = defaultStompOpts, ...registered}) {
   parseRegistered(registered, function send ({target, data: json}) {
-    client.send(`/${destination}/${target}`, stompOpts, JSON.stringify(json))
+    const payload = JSON.stringify(json)
+    client.send(`/${destination}/${target}`, stompOpts, payload)
   })
 }
 
 export function setOnMessage ({handler, client, destination}) {
   return function onMessage (message) {
-    const responses = handler(JSON.parse(message.body))
-    sendAll({client, destination, ...responses})
+    const data = JSON.parse(message.body || {})
+    const responses = handler(data)
+    if (type(responses) === 'Object') {
+      sendAll({client, destination, ...responses})
+    }
   }
 }
 
@@ -98,4 +104,20 @@ export function stompConnect ({
       handleSIGINT({webSocket, client})
     })
   })
+}
+
+let signal = null
+export function getSignal () {
+  return signal || do {
+    const signalOptions = {
+      destination: 'exchange',
+      'amq.direct': () => {},
+    }
+
+    signal = Promise.all(stompConnect(signalOptions))
+      .then(([{client}]) => action => {
+        sendAll({client, ...action})
+      }
+    )
+  }
 }

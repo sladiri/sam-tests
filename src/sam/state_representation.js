@@ -1,21 +1,10 @@
 import morphdom from 'morphdom'
 import h from 'hyperscript'
-import {stompConnect, sendAll} from '../stomp/bus_stomp'
+import {getSignal} from '../stomp/bus_stomp'
 import * as actions from './actions'
 
-const signalOptions = {destination: 'exchange', 'amq.direct': () => {}}
-const signal = Promise.all(stompConnect(signalOptions))
-  .then(([{client}]) => action => {
-    sendAll({client, ...action})
-  }
-)
-
-signal.then(signal => {
-  signal(actions.initialise())
-})
-
 const increment = value => {
-  signal.then(signal => {
+  getSignal().then(signal => {
     signal(actions.increment({value}))
   })
 }
@@ -33,7 +22,6 @@ function pCount ({field}) {
 function button ({disabled}) {
   return h('button', {
     onclick: e => {
-      console.log('whoooo', increment)
       increment(1)
     },
     disabled,

@@ -1,6 +1,6 @@
+import {getSignal} from '../stomp/bus_stomp'
+
 export function nap (model) {
-  console.log('no nap yet')
-  return {}
 }
 
 export function onModel (payload) {
@@ -15,3 +15,7 @@ export function connect () {
     render: nap,
   }
 }
+
+getSignal().then(signal => {
+  signal({propose: {}})
+})

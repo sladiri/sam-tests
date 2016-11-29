@@ -3,17 +3,27 @@ function clone (object) {
 }
 
 let state = {
-  initialRender: true,
+  lastProposalId: undefined,
   field: 0,
 }
 
-function onPropose (payload = {}) {
-  const {field, initialRender} = payload
+export function mutate (payload) {
+  const {field} = payload
   if (field > 0) {
     state.field += field
-  } else if (initialRender === false) {
-    state.initialRender = false
   }
+}
+
+function onPropose (payload) {
+  const backup = clone(state)
+  try {
+    mutate(payload)
+    state.lastProposalId = state.lastProposalId + 1 || 1
+  } catch (e) {
+    state = backup
+    console.error('Reverting model state to backup.', e)
+  }
+
   return {model: clone(state)}
 }
 
