@@ -7,14 +7,14 @@ let state = {
   field: 0,
 }
 
-export function mutate (payload) {
+function mutate (payload) {
   const {field} = payload
   if (field > 0) {
     state.field += field
   }
 }
 
-function onPropose (payload) {
+export function onPropose (payload) {
   const backup = clone(state)
   try {
     mutate(payload)
